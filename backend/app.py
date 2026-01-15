@@ -8,14 +8,14 @@ import os
 from utils import detect_red_flags, calculate_risk_level
 
 app = Flask(__name__)
-CORS(app)  # Allow React frontend to access backend APIs
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 MODEL_VERSION = "v1.0"
 
-
-# ✅ Load Model + Vectorizer safely
-MODEL_PATH = os.path.join("models", "fake_job_model.pkl")
-VECTORIZER_PATH = os.path.join("models", "vectorizer.pkl")
+# ✅ Always load using absolute path (deployment safe)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(BASE_DIR, "models", "fake_job_model.pkl")
+VECTORIZER_PATH = os.path.join(BASE_DIR, "models", "vectorizer.pkl")
 
 try:
     model = joblib.load(MODEL_PATH)
@@ -27,7 +27,6 @@ except Exception as e:
     vectorizer = None
 
 
-# ✅ Health Check Route (Production-style)
 @app.route("/health", methods=["GET"])
 def health():
     return jsonify({
@@ -39,23 +38,19 @@ def health():
     })
 
 
-# ✅ Home route
 @app.route("/", methods=["GET"])
 def home():
     return jsonify({"message": "Fake Job Detector API is running ✅"})
 
 
-# ✅ Predict Route
 @app.route("/predict", methods=["POST"])
 def predict():
-    # ✅ If model not loaded
     if model is None or vectorizer is None:
         return jsonify({
             "success": False,
             "error": "Model not loaded properly. Please retrain or check .pkl files."
         }), 500
 
-    # ✅ Validate JSON input
     if not request.is_json:
         return jsonify({
             "success": False,
@@ -79,20 +74,16 @@ def predict():
             "error": "Title, Company and Description are required."
         }), 400
 
-    # ✅ Minimum text length check (improves prediction reliability)
     if len(description) < 25:
         return jsonify({
             "success": False,
             "error": "Job description too short. Please enter at least 25 characters."
         }), 400
 
-    # ✅ Combine all text for prediction
     text = f"{title} {company} {description}"
 
-    # ✅ Detect red flags from utils
     found_flags = detect_red_flags(text)
 
-    # ✅ ML Prediction
     try:
         text_vector = vectorizer.transform([text])
         prediction = model.predict(text_vector)[0]
@@ -100,13 +91,9 @@ def predict():
 
         confidence = round(float(prob) * 100, 2)
 
-        # ✅ Model output label
         model_result = "FAKE" if prediction == 1 else "REAL"
-
-        # ✅ Risk level from utils (red flags override included)
         risk_level = calculate_risk_level(model_result, confidence, found_flags)
 
-        # ✅ Optional: Force "FAKE" if too many red flags (production safety)
         final_result = model_result
         warning = None
 
@@ -119,8 +106,8 @@ def predict():
             "model_version": MODEL_VERSION,
 
             "prediction": int(prediction),
-            "result": final_result,          # ✅ final output result
-            "model_result": model_result,    # ✅ what ML predicted
+            "result": final_result,
+            "model_result": model_result,
             "confidence": confidence,
 
             "red_flags": found_flags,
@@ -137,6 +124,7 @@ def predict():
         }), 500
 
 
-# ✅ IMPORTANT: Start the server
+# ✅ Production-safe runner
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
