@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import jsPDF from "jspdf";
 import "./App.css";
 
-const API_BASE = "http://127.0.0.1:5000";
+// ✅ IMPORTANT: Use Render backend URL (NOT localhost)
+const API_BASE = "https://fakejobdetector-qz8s.onrender.com";
 
 function App() {
   const [form, setForm] = useState({
@@ -23,18 +24,26 @@ function App() {
     if (saved) setHistory(JSON.parse(saved));
   }, []);
 
-  // ✅ Save history
+  // ✅ Save history to localStorage
   useEffect(() => {
     localStorage.setItem("job_history", JSON.stringify(history));
   }, [history]);
 
   // ✅ Handle Input Changes
   const handleChange = (e) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    setForm((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
   };
 
   const resetForm = () => {
-    setForm({ title: "", company: "", description: "", url: "" });
+    setForm({
+      title: "",
+      company: "",
+      description: "",
+      url: "",
+    });
     setResult(null);
   };
 
@@ -50,26 +59,42 @@ function App() {
     const lower = url.toLowerCase().trim();
     let reasons = [];
 
-    const suspiciousTLDs = [".xyz", ".top", ".site", ".online", ".loan", ".buzz"];
+    // suspicious TLDs
+    const suspiciousTLDs = [
+      ".xyz",
+      ".top",
+      ".site",
+      ".online",
+      ".loan",
+      ".buzz",
+    ];
     suspiciousTLDs.forEach((tld) => {
-      if (lower.includes(tld)) reasons.push(`Suspicious domain extension (${tld})`);
+      if (lower.includes(tld))
+        reasons.push(`Suspicious domain extension (${tld})`);
     });
 
-    // Too many digits
+    // too many digits
     const digits = lower.replace(/[^0-9]/g, "").length;
     if (digits >= 6) reasons.push("Domain contains too many numbers");
 
-    // Short domain length
-    if (lower.length < 12) reasons.push("URL is very short (can be suspicious)");
-
-    // Scam words
+    // scam words
     const scamWords = ["free", "money", "earn", "win", "bonus", "instant", "join"];
     scamWords.forEach((word) => {
-      if (lower.includes(word)) reasons.push(`Contains suspicious keyword: "${word}"`);
+      if (lower.includes(word))
+        reasons.push(`Contains suspicious keyword: "${word}"`);
     });
 
-    // No HTTPS
-    if (lower.startsWith("http://")) reasons.push("Not using HTTPS (http://)");
+    // no https
+    if (lower.startsWith("http://"))
+      reasons.push("Not using HTTPS (http://)");
+
+    // invalid url format
+    try {
+      // eslint-disable-next-line no-new
+      new URL(lower);
+    } catch {
+      reasons.push("URL format looks invalid");
+    }
 
     return {
       status: reasons.length >= 2 ? "SUSPICIOUS" : "SAFE",
@@ -77,7 +102,8 @@ function App() {
     };
   };
 
-  const urlCheck = analyzeURL(form.url);
+  // ✅ Memoized URL analysis (better performance)
+  const urlCheck = useMemo(() => analyzeURL(form.url), [form.url]);
 
   // ✅ Submit Job for Prediction
   const submitJob = async (e) => {
@@ -94,6 +120,7 @@ function App() {
 
       const data = response.data;
 
+      // ✅ Production error format
       if (data.success === false) {
         alert(data.error || "Something went wrong!");
         return;
@@ -104,15 +131,17 @@ function App() {
         title: form.title,
         company: form.company,
         description: form.description,
-        url: form.url, // ✅ store url in history
+        url: form.url,
 
+        // ✅ backend outputs
         result: data.result,
         model_result: data.model_result,
         confidence: data.confidence,
         red_flags: data.red_flags || [],
         risk_level: data.risk_level,
-        warning: data.warning,
+        warning: data.warning || null,
 
+        // ✅ URL verification stored
         url_status: urlCheck?.status || "NOT_PROVIDED",
         url_reasons: urlCheck?.reasons || [],
 
@@ -122,8 +151,8 @@ function App() {
       setResult(record);
       setHistory((prev) => [record, ...prev].slice(0, 5));
     } catch (err) {
-      console.error(err);
-      alert("Backend not responding. Please ensure Flask is running!");
+      console.error("❌ API Error:", err);
+      alert("Backend not responding. Please ensure backend is deployed & running!");
     } finally {
       setLoading(false);
     }
@@ -146,6 +175,7 @@ function App() {
     if (!result) return;
 
     const doc = new jsPDF();
+
     doc.setFont("helvetica", "bold");
     doc.setFontSize(16);
     doc.text("Fake Job Posting Detector Report", 14, 18);
@@ -206,8 +236,8 @@ function App() {
 
     doc.setFont("helvetica", "normal");
     if (result.red_flags.length > 0) {
-      result.red_flags.forEach((f) => {
-        doc.text(`- ${f}`, 18, y);
+      result.red_flags.forEach((flag) => {
+        doc.text(`- ${flag}`, 18, y);
         y += 7;
       });
     } else {
@@ -221,10 +251,8 @@ function App() {
     y += 8;
 
     doc.setFont("helvetica", "normal");
-    const lines = doc.splitTextToSize(
-      result.description.slice(0, 500) + "...",
-      180
-    );
+    const preview = result.description.slice(0, 500) + "...";
+    const lines = doc.splitTextToSize(preview, 180);
     doc.text(lines, 14, y);
 
     doc.save("Fake_Job_Report.pdf");
@@ -290,9 +318,15 @@ function App() {
               />
             </label>
 
-            {/* ✅ URL Quick Verification UI */}
+            {/* ✅ URL Quick Verification */}
             {form.url.trim() !== "" && urlCheck && (
-              <div className={urlCheck.status === "SUSPICIOUS" ? "urlBox danger" : "urlBox safe"}>
+              <div
+                className={
+                  urlCheck.status === "SUSPICIOUS"
+                    ? "urlBox danger"
+                    : "urlBox safe"
+                }
+              >
                 <b>URL Check:</b> {urlCheck.status}
                 {urlCheck.reasons.length > 0 && (
                   <ul>
@@ -339,7 +373,13 @@ function App() {
           ) : (
             <div className="resultCard">
               <div className="badges">
-                <span className={result.result === "FAKE" ? "badge badgeDanger" : "badge badgeSuccess"}>
+                <span
+                  className={
+                    result.result === "FAKE"
+                      ? "badge badgeDanger"
+                      : "badge badgeSuccess"
+                  }
+                >
                   {result.result}
                 </span>
 
@@ -356,22 +396,52 @@ function App() {
                 </span>
               </div>
 
-              <p><b>Confidence:</b> {result.confidence}%</p>
+              <p>
+                <b>Confidence:</b> {result.confidence}%
+              </p>
 
               <div className="progressBar">
-                <div className="progressFill" style={{ width: `${result.confidence}%` }} />
+                <div
+                  className="progressFill"
+                  style={{ width: `${result.confidence}%` }}
+                />
               </div>
 
-              {result.warning && <p className="warningText">⚠️ {result.warning}</p>}
+              {/* ✅ Warning */}
+              {result.warning && (
+                <p className="warningText">⚠️ {result.warning}</p>
+              )}
+
+              {/* ✅ URL Status */}
+              {result.url && (
+                <div
+                  className={
+                    result.url_status === "SUSPICIOUS"
+                      ? "urlBox danger"
+                      : "urlBox safe"
+                  }
+                >
+                  <b>URL Status:</b> {result.url_status}
+                  {result.url_reasons.length > 0 && (
+                    <ul>
+                      {result.url_reasons.map((r, i) => (
+                        <li key={i}>{r}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
 
               <h3 className="sectionTitle">
-                {result.red_flags.length > 0 ? "🚩 Suspicious Red Flags Found" : "✅ Red Flags Check Passed"}
+                {result.red_flags.length > 0
+                  ? "🚩 Suspicious Red Flags Found"
+                  : "✅ Red Flags Check Passed"}
               </h3>
 
               {result.red_flags.length > 0 ? (
                 <ul className="flagList">
-                  {result.red_flags.map((f, idx) => (
-                    <li key={idx}>🚩 {f}</li>
+                  {result.red_flags.map((flag, idx) => (
+                    <li key={idx}>🚩 {flag}</li>
                   ))}
                 </ul>
               ) : (
@@ -387,8 +457,13 @@ function App() {
           {/* ✅ HISTORY */}
           <div className="historyHeader" id="history">
             <h2 className="panelTitle">History (Last 5)</h2>
+
             {history.length > 0 && (
-              <button className="btnDangerSmall" type="button" onClick={clearHistory}>
+              <button
+                className="btnDangerSmall"
+                type="button"
+                onClick={clearHistory}
+              >
                 Clear
               </button>
             )}
@@ -407,13 +482,19 @@ function App() {
                   <p className="historyTitle">
                     <b>{h.title}</b> — {h.company}
                   </p>
+
                   <p className="historyMeta">
-                    <span className={h.result === "FAKE" ? "miniTag danger" : "miniTag success"}>
+                    <span
+                      className={
+                        h.result === "FAKE" ? "miniTag danger" : "miniTag success"
+                      }
+                    >
                       {h.result}
                     </span>
                     <span className="miniTag neutral">{h.confidence}%</span>
                     <span className="miniTag neutral">{h.time}</span>
                   </p>
+
                   <p className="smallHint">Click to view again</p>
                 </div>
               ))}
