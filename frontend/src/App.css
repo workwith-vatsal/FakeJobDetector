@@ -1,0 +1,432 @@
+* {
+  box-sizing: border-box;
+}
+
+/* ✅ Page Layout */
+.page {
+  font-family: "Segoe UI", Arial, sans-serif;
+  padding: 28px;
+  max-width: 1200px;
+  margin: auto;
+}
+
+/* ✅ Navbar */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0px 5px 16px rgba(0, 0, 0, 0.06);
+  margin-bottom: 18px;
+}
+
+.logo {
+  font-size: 18px;
+  font-weight: 900;
+  color: #2563eb;
+  letter-spacing: 0.3px;
+}
+
+.navRight {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.navRight a {
+  text-decoration: none;
+  font-weight: 800;
+  color: #0f172a;
+  padding: 8px 10px;
+  border-radius: 12px;
+  transition: 0.2s ease;
+}
+
+.navRight a:hover {
+  background: #f1f5f9;
+  color: #2563eb;
+}
+
+/* ✅ Header */
+.header {
+  text-align: center;
+  margin-bottom: 18px;
+}
+
+.header h1 {
+  font-size: 34px;
+  margin-bottom: 6px;
+}
+
+.subtext {
+  color: #475569;
+  font-size: 15px;
+}
+
+/* ✅ 2-column Layout */
+.grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: 1fr 1fr;
+}
+
+/* ✅ Panel Cards */
+.panel {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0px 5px 16px rgba(0, 0, 0, 0.06);
+}
+
+.panelTitle {
+  font-size: 20px;
+  margin-bottom: 12px;
+}
+
+/* ✅ Form */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+label {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+input,
+textarea {
+  padding: 12px 14px;
+  font-size: 15px;
+  border-radius: 12px;
+  border: 1px solid #cbd5e1;
+  outline: none;
+  transition: 0.15s ease;
+}
+
+textarea {
+  resize: vertical;
+}
+
+input:focus,
+textarea:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* ✅ Form actions */
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* ✅ Buttons */
+.btnPrimary {
+  flex: 2;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  background: #2563eb;
+  color: white;
+  font-weight: 800;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.btnPrimary:hover {
+  background: #1d4ed8;
+}
+
+.btnPrimary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.btnSecondary {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  background: #475569;
+  color: white;
+  font-weight: 800;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.btnSecondary:hover {
+  background: #334155;
+}
+
+/* ✅ Result Card */
+.resultCard {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.badges {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.badgeSuccess {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.badgeWarn {
+  background: #ffedd5;
+  color: #9a3412;
+}
+
+.badgeDanger {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.sectionTitle {
+  margin-top: 14px;
+  margin-bottom: 8px;
+}
+
+/* ✅ Red Flags */
+.flagList {
+  margin: 0;
+  padding-left: 16px;
+}
+
+.flagList li {
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.safeText {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+/* ✅ Progress Bar */
+.progressBar {
+  width: 100%;
+  height: 12px;
+  background: #e2e8f0;
+  border-radius: 999px;
+  overflow: hidden;
+  margin: 8px 0 12px;
+}
+
+.progressFill {
+  height: 12px;
+  background: #2563eb;
+  transition: width 0.35s ease;
+}
+
+/* ✅ Warning Box */
+.warningText {
+  margin-top: 10px;
+  font-weight: 800;
+  color: #991b1b;
+  background: #fee2e2;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid #fecaca;
+}
+
+/* ✅ Download PDF Button */
+.btnGreen {
+  margin-top: 12px;
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  background: #16a34a;
+  color: white;
+  font-weight: 900;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.btnGreen:hover {
+  background: #15803d;
+}
+
+/* ✅ History */
+.historyHeader {
+  margin-top: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.historyList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.historyItem {
+  padding: 12px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  transition: 0.2s ease;
+}
+
+.historyItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0px 8px 18px rgba(0, 0, 0, 0.06);
+}
+
+.historyTitle {
+  margin: 0 0 6px;
+}
+
+.historyMeta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.miniTag {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.miniTag.success {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.miniTag.danger {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.miniTag.neutral {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+/* ✅ Clear History Button */
+.btnDangerSmall {
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: none;
+  background: #dc2626;
+  color: white;
+  font-weight: 900;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.btnDangerSmall:hover {
+  background: #b91c1c;
+}
+
+/* ✅ Empty State */
+.emptyState {
+  padding: 16px;
+  border-radius: 14px;
+  background: #f1f5f9;
+  border: 1px dashed #94a3b8;
+  margin-bottom: 10px;
+}
+
+/* ✅ Footer */
+.footer {
+  text-align: center;
+  margin-top: 16px;
+  padding: 12px;
+  color: #475569;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* ✅ Responsive */
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .navbar {
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .navRight {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+
+  .btnPrimary,
+  .btnSecondary {
+    width: 100%;
+  }
+}
+
+/* ✅ URL Check Box */
+.urlBox {
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  font-size: 14px;
+  background: #f8fafc;
+}
+
+.urlBox ul {
+  margin-top: 8px;
+  padding-left: 18px;
+}
+
+.urlBox.safe {
+  background: #dcfce7;
+  border: 1px solid #86efac;
+  color: #166534;
+}
+
+.urlBox.danger {
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+
+/* ✅ Clickable History */
+.clickable {
+  cursor: pointer;
+}
+
+.smallHint {
+  font-size: 12px;
+  font-weight: 700;
+  opacity: 0.7;
+  margin-top: 6px;
+}
